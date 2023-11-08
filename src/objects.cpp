@@ -6,21 +6,10 @@
 #include "ray.h"
 #include "material.h"
 #include "objects.h"
-//#include "../lib/fastbvh/BVH.h"
 
-
-ObjectIntersection::ObjectIntersection(bool hit_, double u_, Vec n_, Material* m_)
-{
-	hit=hit_, u=u_, n=n_, m=m_;
-}
-
-
-Sphere::Sphere( Vec p_, double r_, Material* m_ ) {
-	m_p=p_, m_r=r_, m_m=m_;
-}
 
 double Sphere::get_radius() { return m_r; }
-Material* Sphere::get_material() { return m_m; }
+Material* Sphere::get_material() { return material; }
 
 // Check if ray intersects with sphere. Returns ObjectIntersection data structure
 ObjectIntersection Sphere::get_intersection(const Ray &ray) {
@@ -29,21 +18,25 @@ ObjectIntersection Sphere::get_intersection(const Ray &ray) {
 	double distance = 0;
 	Vec n = Vec();
 
-	Vec op = m_p-ray.origin;
+	Vec op = position-ray.origin;
 	double t, eps=1e-4, b=op.dot(ray.direction), det=b*b-op.dot(op)+m_r*m_r;
-	if (det<0) return ObjectIntersection(hit, distance, n, m_m); 
+	if (det<0) return ObjectIntersection(hit, distance, n, material); 
 	else det=sqrt(det);
 	distance = (t=b-det)>eps ? t : ((t=b+det)>eps ? t : 0);
 	if (distance != 0) hit = true, 
-		n = ((ray.origin + ray.direction * distance) - m_p).norm();
+		n = ((ray.origin + ray.direction * distance) - position).norm();
 
-	return ObjectIntersection(hit, distance, n, m_m);
+	return ObjectIntersection(hit, distance, n, material);
 }
 
 
-Mesh::Mesh(Vec p_, const char* file_path, Material* m_) {
+Mesh::Mesh(Vec p_, const char* file_path, Material* m_) : Object(p_, m_){
 
-	m_p=p_, m_m=m_;
+	position=p_, material=m_;
+
+    std::vector<tinyobj::shape_t> m_shapes;
+    std::vector<tinyobj::material_t> materialaterials;
+
 
     std::string mtlbasepath;
     std::string inputfile = file_path;
@@ -52,7 +45,7 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) {
 
     printf("Loading %s...\n", file_path);
     // Attempt to load mesh
-	std::string err = tinyobj::LoadObj(m_shapes, m_materials, inputfile.c_str(), mtlbasepath.c_str());
+	std::string err = tinyobj::LoadObj(m_shapes, materialaterials, inputfile.c_str(), mtlbasepath.c_str());
 
 	if (!err.empty()) {
 		std::cerr << err << std::endl;
@@ -62,16 +55,16 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) {
 
     long shapes_size, indices_size, materials_size;
     shapes_size = m_shapes.size();
-    materials_size = m_materials.size();
+    materials_size = materialaterials.size();
 
     // Load materials/textures from obj
     // TODO: Only texture is loaded at the moment, need to implement material types and colours
     for (int i=0; i<materials_size; i++) {
         std::string texture_path = "";
 
-        if (!m_materials[i].diffuse_texname.empty()){
-            if (m_materials[i].diffuse_texname[0] == '/') texture_path = m_materials[i].diffuse_texname;
-            texture_path = mtlbasepath + m_materials[i].diffuse_texname;
+        if (!materialaterials[i].diffuse_texname.empty()){
+            if (materialaterials[i].diffuse_texname[0] == '/') texture_path = materialaterials[i].diffuse_texname;
+            texture_path = mtlbasepath + materialaterials[i].diffuse_texname;
             materials.push_back( new DiffuseMaterial(false, Vec(1,1,1), Vec(), texture_path.c_str()) );
         }
         else {
@@ -90,19 +83,19 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) {
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3 + 2 ]
-            ) + m_p;
+            ) + position;
 
             Vec v1_ = Vec(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3 + 2 ]
-            ) + m_p;
+            ) + position;
 
             Vec v2_ = Vec(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3 + 2 ]
-            ) + m_p;
+            ) + position;
 
             Vec t0_, t1_, t2_;
 
@@ -135,13 +128,10 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) {
             if (m_shapes[i].mesh.material_ids[ f ] < materials.size())
                 tris.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, materials[ m_shapes[i].mesh.material_ids[ f ] ]));
             else
-                tris.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, m_m));
+                tris.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, material));
         }
     }
 
-    // Clean up
-    m_shapes.clear();
-    m_materials.clear();
     node = KDNode().build(tris, 0);
     printf("\n");
 	//bvh = BVH(&tris);
