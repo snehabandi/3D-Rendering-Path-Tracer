@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <math.h>
 #include <stdint.h>
+#include <assert.h>
 
 // Vector 3
 struct Vec {
@@ -12,6 +13,7 @@ struct Vec {
 
     // Return x,y, and z component for 0, 1, and 2 respectively
     double axis(uint32_t axis){
+        assert(axis < 3);
         if (axis == 0) return x;
         if (axis == 1) return y;
         if (axis == 2) return z;
@@ -28,6 +30,10 @@ struct Vec {
     Vec operator%(Vec&b){return Vec(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);}      // Cross product
     Vec cross(const Vec&b){return Vec(y*b.z-z*b.y,z*b.x-x*b.z,x*b.y-y*b.x);}    // Cross product
     double mag() const{return sqrt(x*x+y*y+z*z);}                               // Calculate vector magnitude
+    double operator[](size_t i){
+        assert(i < 3);
+        return axis(i);
+    };
 };
 
 #endif // VECTOR_H

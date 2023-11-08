@@ -34,32 +34,33 @@ KDNode* KDNode::build(std::vector<Triangle*> &tris, int depth){
     }
 
     node->box = tris[0]->get_bounding_box();
-    Vec midpt = Vec();
+    Vec avg_midpt = Vec();
     double tris_recp = 1.0/tris.size();
 
     for (long i=1; i<tris.size(); i++) {
         node->box.expand(tris[i]->get_bounding_box());
-        midpt = midpt + (tris[i]->get_midpoint() * tris_recp);
+        avg_midpt = avg_midpt + (tris[i]->get_midpoint() * tris_recp);
     }
+
+    // For each axis, get mean of coordinate of midpoint of triangle
+    // Then take the axis with the biggest span & distribute the triangle into left & right of the tree based
+    // on whether it is bigger than average or not
+
 
     std::vector<Triangle*> left_tris;
     std::vector<Triangle*> right_tris;
     int axis = node->box.get_longest_axis();
 
-    for (long i=0; i<tris.size(); i++) {
-        switch (axis) {
-            case 0:
-                midpt.x >= tris[i]->get_midpoint().x ? right_tris.push_back(tris[i]) : left_tris.push_back(tris[i]);
-                break;
-            case 1:
-                midpt.y >= tris[i]->get_midpoint().y ? right_tris.push_back(tris[i]) : left_tris.push_back(tris[i]);
-                break;
-            case 2:
-                midpt.z >= tris[i]->get_midpoint().z ? right_tris.push_back(tris[i]) : left_tris.push_back(tris[i]);
-                break;
+    for(auto triangle: tris){
+        if(avg_midpt[axis] >= triangle->get_midpoint()[axis]){
+            left_tris.push_back(triangle);
+        }
+        else{
+            right_tris.push_back(triangle);
         }
     }
 
+    
     if (tris.size() == left_tris.size() || tris.size() == right_tris.size()) {
         node->triangles = tris;
         node->leaf = true;
