@@ -6,6 +6,14 @@
 
 The plannedobjective of this project is to build a Path Tracer. Path Tracing is a technique to render 3D scenes, simulating the way light bounces around objects in real life to achieve realism.
 
+## Instructions to run
+
+1. Install prerequisites (cmake)
+2. Create build directory and navigate to it
+3. cmake PATH_TO_SOURCE (eg: cmake /c/users/sneha/CSCI596/)
+4. make
+5. ./pathtracer num_samples (eg: ./pathtracer 5)
+
 ## 1. Objective
 
 The primary objective of this project is to develop a high-performance Path Tracer in C++ for rendering 3D scenes. Path Tracing is a state-of-the-art technique for simulating the behavior of light in virtual environments, allowing for the creation of photorealistic images. The project aims to achieve the following specific goals:
