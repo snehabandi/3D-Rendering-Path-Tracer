@@ -1,7 +1,6 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
-#include "vector.h"
 #include "ray.h"
 #include "triangle.h"
 #include "kdtree.h"
@@ -11,11 +10,11 @@
 
 struct ObjectIntersection {
 	bool hit;	// If there was an intersection
-	double u;	// Distance to intersection along ray
-	Vec n;		// Normal of intersected face
+	float u;	// Distance to intersection along ray
+	glm::vec3 n;		// Normal of intersected face
 	Material* m;	// Material of intersected face
 
-	ObjectIntersection(bool hit_=false, double u_=0, Vec n_=Vec(), Material* m_=nullptr):
+	ObjectIntersection(bool hit_=false, float u_=0, glm::vec3 n_=glm::vec3(), Material* m_=nullptr):
 	hit{hit_},
 	u{u_},
 	n{n_},
@@ -26,9 +25,9 @@ struct ObjectIntersection {
 class Object {
 
 public:
-	Vec position; // Position
+	glm::vec3 position; // Position
 	Material* material;	// Material
-	Object(Vec p, Material* m): position{p}, material{m}{};
+	Object(glm::vec3 p, Material* m): position{p}, material{m}{};
 	virtual ObjectIntersection get_intersection(const Ray &r) = 0;
 };
 
@@ -36,15 +35,15 @@ public:
 class Sphere : public Object {
 
 private:
-	double m_r;	// Radius
+	float m_r;	// Radius
 	
 
 public:
-	Sphere(Vec p_, double r_, Material* m_): Object(p_, m_), m_r(r_){};	
-	virtual double get_radius();
+	Sphere(glm::vec3 p_, double r_, Material* m_): Object(p_, m_), m_r(r_){};	
+	virtual float get_radius();
 	virtual Material* get_material();
 
-	virtual ObjectIntersection get_intersection(const Ray &r);
+	virtual ObjectIntersection get_intersection(const Ray &r) override;
 };
 
 
@@ -56,8 +55,8 @@ private:
     KDNode *node;
 
 public:
-	Mesh(Vec p_, const char* file_path, Material* m_);
-	virtual ObjectIntersection get_intersection(const Ray &r);
+	Mesh(glm::vec3 p_, const char* file_path, Material* m_);
+	virtual ObjectIntersection get_intersection(const Ray &r) override;
 
 };
 

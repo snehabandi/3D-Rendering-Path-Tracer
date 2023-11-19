@@ -4,30 +4,29 @@
 #include <algorithm>
 #include <cfloat>
 
-#include "vector.h"
 #include "aabb.h"
 #include "material.h"
 
 struct Triangle {
-    Vec v0, v1, v2;     // Vertex world space coordinates
-    Vec e1, e2;         // Edge 1 and edge 2 of triangle
-    Vec n, t0, t1, t2;  // Triangle normal and texture coordinates
+    glm::vec3 v0, v1, v2;     // Vertex world space coordinates
+    glm::vec3 e1, e2;         // Edge 1 and edge 2 of triangle
+    glm::vec3 n, t0, t1, t2;  // Triangle normal and texture coordinates
     Material *m;        // Pointer to material
 
-    Triangle(Vec v0_, Vec v1_, Vec v2_, Vec t0_=Vec(), Vec t1_=Vec(), Vec t2_=Vec(), Material *m_=NULL){
-        v0=v0_, v1=v1_, v2=v2_, e1=v1-v0, e2=v2-v0, n=e1.cross(e2).norm();
+    Triangle(glm::vec3 v0_, glm::vec3 v1_, glm::vec3 v2_, glm::vec3 t0_=glm::vec3(), glm::vec3 t1_=glm::vec3(), glm::vec3 t2_=glm::vec3(), Material *m_=NULL){
+        v0=v0_, v1=v1_, v2=v2_, e1=v1-v0, e2=v2-v0, n=glm::normalize(glm::cross(e1, e2));
         t0=t0_, t1=t1_, t2=t2_;
         m=m_;
     }
 
     // Returns axis aligned bounding box that contains the triangle
     AABB get_bounding_box(){
-        Vec bl = Vec(
+        glm::vec3 bl = glm::vec3(
                 std::min (std::min(v0.x, v1.x), v2.x ) ,
                 std::min (std::min(v0.y, v1.y), v2.y ) ,
                 std::min (std::min(v0.z, v1.z), v2.z )
         );
-        Vec tr = Vec(
+        glm::vec3 tr = glm::vec3(
                 std::max (std::max(v0.x, v1.x), v2.x ) ,
                 std::max (std::max(v0.y, v1.y), v2.y ) ,
                 std::max (std::max(v0.z, v1.z), v2.z )
@@ -37,26 +36,26 @@ struct Triangle {
     }
 
     // Returns the midpoint of the triangle
-    Vec get_midpoint(){
-        return (v0 + v1 + v2)/3;
+    glm::vec3 get_midpoint(){
+        return (v0 + v1 + v2)/3.0f;
     }
 
     // Checks if ray intersects with triangle. Returns true/false.
-    bool intersect(Ray ray, double &t, double tmin, Vec &norm) const {
+    bool intersect(Ray ray, float &t, float tmin, glm::vec3 &norm) const {
 
-        double u, v, t_temp=0;
+        float u, v, t_temp=0;
 
-        Vec pvec = ray.direction.cross(e2);
-        double det = e1.dot(pvec);
+        glm::vec3 pvec = glm::cross(ray.direction, e2);
+        float det = glm::dot(e1, pvec);
         if (det == 0) return false;
-        double invDet = 1. / det;
-        Vec tvec = ray.origin - v0;
-        u = tvec.dot(pvec) * invDet;
+        float invDet = 1. / det;
+        glm::vec3 tvec = ray.origin - v0;
+        u = glm::dot(tvec, pvec) * invDet;
         if (u < 0 || u > 1) return false;
-        Vec qvec = tvec.cross(e1);
-        v = ray.direction.dot(qvec) * invDet;
+        glm::vec3 qvec = glm::cross(tvec, e1);
+        v = glm::dot(ray.direction, qvec) * invDet;
         if (v < 0 || u + v > 1) return false;
-        t_temp = e2.dot(qvec) * invDet; // Set distance along ray to intersection
+        t_temp = glm::dot(e2, (qvec)) * invDet; // Set distance along ray to intersection
         if (t_temp < tmin) {
             if (t_temp > 1e-9 ){    // Fairly arbritarily small value, scared to change
                 t = t_temp;         // it as it works.
@@ -68,26 +67,26 @@ struct Triangle {
     }
 
     // Returns barycentric coordinates of point p on the triangle
-    Vec barycentric(Vec p){
-        Vec v2_ = p - v0;
-        double d00 = e1.dot(e1);
-        double d01 = e1.dot(e2);
-        double d11 = e2.dot(e2);
-        double d20 = v2_.dot(e1);
-        double d21 = v2_.dot(e2);
-        double d = d00*d11 - d01*d01;
-        double v = (d11*d20 - d01*d21) / d;
-        double w = (d00*d21 - d01*d20) / d;
-        double u = 1 - v - w;
-        return Vec(u, v, w);
+    glm::vec3 barycentric(glm::vec3 p){
+        glm::vec3 v2_ = p - v0;
+        float d00 = glm::dot(e1, e1);
+        float d01 = glm::dot(e1, e2);
+        float d11 = glm::dot(e2, e2);
+        float d20 = glm::dot(v2_, e1);
+        float d21 = glm::dot(v2_, e2);
+        float d = d00*d11 - d01*d01;
+        float v = (d11*d20 - d01*d21) / d;
+        float w = (d00*d21 - d01*d20) / d;
+        float u = 1 - v - w;
+        return glm::vec3(u, v, w);
     }
 
     // Returns the colour at point p on the triangle
-    Vec get_colour_at(Vec p){
-        if(m==NULL) return Vec(1,0,1);
+    glm::vec3 get_colour_at(glm::vec3 p){
+        if(m==NULL) return glm::vec3(1,0,1);
 
-        Vec b = barycentric(p);
-        Vec c = Vec();
+        glm::vec3 b = barycentric(p);
+        glm::vec3 c = glm::vec3();
         c = c + (t0 * b.x);
         c = c + (t1 * b.y);
         c = c + (t2 * b.z);

@@ -1,12 +1,12 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "vector.h"
+#include <glm/glm.hpp>
 
 struct Ray {
-    Vec origin, direction, direction_inv;
-    Ray(Vec o_, Vec d_) : origin(o_), direction(d_) {
-        direction_inv = Vec(
+    glm::vec3 origin, direction, direction_inv;
+    Ray(glm::vec3 o_, glm::vec3 d_) : origin(o_), direction(d_) {
+        direction_inv = glm::vec3(
                 1./direction.x,
                 1./direction.y,
                 1./direction.z

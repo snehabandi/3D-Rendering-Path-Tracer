@@ -13,13 +13,13 @@ inline int toInt(double x){ return int(clamp(x)*255+.5); }
 Renderer::Renderer(Scene *scene, Camera *camera) {
     m_scene = scene;
     m_camera = camera;
-    m_pixel_buffer = new Vec[m_camera->get_width()*m_camera->get_height()];
+    m_pixel_buffer = new glm::vec3[m_camera->get_width()*m_camera->get_height()];
 }
 
 void Renderer::render(int samples) {
     int width = m_camera->get_width();
     int height = m_camera->get_height();
-    double samples_recp = 1./samples;
+    float samples_recp = 1./samples;
 
     // Main Loop
     #pragma omp parallel for schedule(dynamic, 1)       // OpenMP
@@ -30,7 +30,7 @@ void Renderer::render(int samples) {
                 samples, (double)y/height*100);                   // progress
 
         for (int x=0; x<width; x++){
-            Vec col = Vec();
+            glm::vec3 col = glm::vec3();
 
             for (int a=0; a<samples; a++){
                 Ray ray = m_camera->get_ray(x, y);

@@ -20,42 +20,37 @@ ObjectIntersection Scene::intersect(const Ray &ray) {
     return isct;
 }
 
-Vec Scene::trace_ray(const Ray &ray, int depth, unsigned short*Xi) {
+glm::vec3 Scene::trace_ray(const Ray &ray, int depth, unsigned short*Xi) {
 
     ObjectIntersection isct = intersect(ray);
 
     // If no hit, return world colour
-    if (!isct.hit) return Vec();
-    /*if (!isct.hit){
-        double u, v;
-        v = (acos(Vec(0,0,1).dot(ray.direction))/M_PI);
-        u = (acos(ray.direction.y)/ M_PI);
-        return bg.get_pixel(fabs(u), fabs(v))*1.2;
-    }*/
+    if (!isct.hit) return glm::vec3();
+
 
     if (isct.m->does_emit()) return isct.m->get_emission();
-    //Vec x = ray.origin + ray.direction * isct.u;
 
-    Vec colour = isct.m->get_colour();
-    //return colour * isct.n.dot((Vec(1,-3,8)-x).norm());
+
+    glm::vec3 colour = isct.m->get_colour();
+
 
     // Calculate max reflection
-    double p = colour.x>colour.y && colour.x>colour.z ? colour.x : colour.y>colour.z ? colour.y : colour.z;
+    float p = colour.x>colour.y && colour.x>colour.z ? colour.x : colour.y>colour.z ? colour.y : colour.z;
 
     // Russian roulette termination.
     // If random number between 0 and 1 is > p, terminate and return hit object's emmission
-    double rnd = erand48(Xi);
+    float rnd = erand48(Xi);
     if (++depth>5){
         if (rnd<p*0.9) { // Multiply by 0.9 to avoid infinite loop with colours of 1.0
-            colour=colour*(0.9/p);
+            colour=colour*(0.9f/p);
         }
         else {
             return isct.m->get_emission();
         }
     }
 
-    Vec x = ray.origin + ray.direction * isct.u;
+    glm::vec3 x = ray.origin + ray.direction * isct.u;
     Ray reflected = isct.m->get_reflected_ray(ray, x, isct.n, Xi);
 
-    return colour.mult( trace_ray(reflected, depth, Xi) );
+    return colour * ( trace_ray(reflected, depth, Xi) );
 }

@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include "time.h"
 
-#include "vector.h"
 #include "material.h"
 #include "objects.h"
 #include "camera.h"
@@ -31,16 +30,16 @@ int main(int argc, char *argv[]) {
 
     if (argc == 2) samples = atoi(argv[1]);
 
-    Camera camera = Camera(Vec(0, -5, 2.5), Vec(0,0,1), 1280, 720);     // Create camera
+    Camera camera = Camera(glm::vec3(0, -5, 2.5), glm::vec3(0,0,1), 1280, 720);     // Create camera
     Scene scene = Scene();                                              // Create scene
 
     // Add objects to scene
-    scene.add( dynamic_cast<Object*>(new Sphere(Vec(0,0,-1000), 1000, new DiffuseMaterial(false))) );
-    scene.add( dynamic_cast<Object*>(new Sphere(Vec(-1004,0,0), 1000, new DiffuseMaterial(false,Vec(0.85,0.4,0.4)))) );
-    scene.add( dynamic_cast<Object*>(new Sphere(Vec(1004,0,0), 1000, new DiffuseMaterial(false,Vec(0.4,0.4,0.85)))) );
-    scene.add( dynamic_cast<Object*>(new Sphere(Vec(0,1006,0), 1000, new DiffuseMaterial(false))) );
-    scene.add( dynamic_cast<Object*>(new Sphere(Vec(0,0,110), 100, new SpecularMaterial(true, Vec(1,1,1), Vec(2.2,2.2,2.2)))) );
-    scene.add( dynamic_cast<Object*>(new Mesh(Vec(), "../obj/dragon2.obj", new DiffuseMaterial(false, Vec(0.9, 0.9, 0.9)))) );
+    scene.add( dynamic_cast<Object*>(new Sphere(glm::vec3(0,0,-1000), 1000, new DiffuseMaterial(false))) );
+    scene.add( dynamic_cast<Object*>(new Sphere(glm::vec3(-1004,0,0), 1000, new DiffuseMaterial(false,glm::vec3(0.85,0.4,0.4)))) );
+    scene.add( dynamic_cast<Object*>(new Sphere(glm::vec3(1004,0,0), 1000, new DiffuseMaterial(false,glm::vec3(0.4,0.4,0.85)))) );
+    scene.add( dynamic_cast<Object*>(new Sphere(glm::vec3(0,1006,0), 1000, new DiffuseMaterial(false))) );
+    scene.add( dynamic_cast<Object*>(new Sphere(glm::vec3(0,0,110), 100, new SpecularMaterial(true, glm::vec3(1,1,1), glm::vec3(2.2,2.2,2.2)))) );
+    scene.add( dynamic_cast<Object*>(new Mesh(glm::vec3(), "../obj/dragon2.obj", new DiffuseMaterial(false, glm::vec3(0.9, 0.9, 0.9)))) );
 
 
     Renderer renderer = Renderer(&scene, &camera);  // Create renderer with our scene and camera

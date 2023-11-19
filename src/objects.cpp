@@ -2,35 +2,34 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "vector.h"
 #include "ray.h"
 #include "material.h"
 #include "objects.h"
 
 
-double Sphere::get_radius() { return m_r; }
+float Sphere::get_radius() { return m_r; }
 Material* Sphere::get_material() { return material; }
 
 // Check if ray intersects with sphere. Returns ObjectIntersection data structure
 ObjectIntersection Sphere::get_intersection(const Ray &ray) {
 	// Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0
 	bool hit = false;
-	double distance = 0;
-	Vec n = Vec();
+	float distance = 0;
+	glm::vec3 n = glm::vec3();
 
-	Vec op = position-ray.origin;
-	double t, eps=1e-4, b=op.dot(ray.direction), det=b*b-op.dot(op)+m_r*m_r;
+	glm::vec3 op = position-ray.origin;
+	float t, eps=1e-4, b=glm::dot(op, ray.direction), det=b*b-glm::dot(op, op)+m_r*m_r;
 	if (det<0) return ObjectIntersection(hit, distance, n, material); 
 	else det=sqrt(det);
 	distance = (t=b-det)>eps ? t : ((t=b+det)>eps ? t : 0);
 	if (distance != 0) hit = true, 
-		n = ((ray.origin + ray.direction * distance) - position).norm();
+		n = glm::normalize(((ray.origin + ray.direction * distance) - position));
 
 	return ObjectIntersection(hit, distance, n, material);
 }
 
 
-Mesh::Mesh(Vec p_, const char* file_path, Material* m_) : Object(p_, m_){
+Mesh::Mesh(glm::vec3 p_, const char* file_path, Material* m_) : Object(p_, m_){
 
 	position=p_, material=m_;
 
@@ -65,10 +64,10 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) : Object(p_, m_){
         if (!materialaterials[i].diffuse_texname.empty()){
             if (materialaterials[i].diffuse_texname[0] == '/') texture_path = materialaterials[i].diffuse_texname;
             texture_path = mtlbasepath + materialaterials[i].diffuse_texname;
-            materials.push_back( new DiffuseMaterial(false, Vec(1,1,1), Vec(), texture_path.c_str()) );
+            materials.push_back( new DiffuseMaterial(false, glm::vec3(1,1,1), glm::vec3(), texture_path.c_str()) );
         }
         else {
-            materials.push_back( new DiffuseMaterial(false, Vec(1,1,1), Vec()) );
+            materials.push_back( new DiffuseMaterial(false, glm::vec3(1,1,1), glm::vec3()) );
         }
 
     }
@@ -76,56 +75,56 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) : Object(p_, m_){
     // Load triangles from obj
     for (int i = 0; i < shapes_size; i++) {
         indices_size = m_shapes[i].mesh.indices.size() / 3;
-        for (size_t f = 0; f < indices_size; f++) {
+        for (auto f = (decltype(indices_size)) 0; f < indices_size; f++) {
 
             // Triangle vertex coordinates
-            Vec v0_ = Vec(
+            glm::vec3 v0_ = glm::vec3(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3 + 2 ]
             ) + position;
 
-            Vec v1_ = Vec(
+            glm::vec3 v1_ = glm::vec3(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3 + 2 ]
             ) + position;
 
-            Vec v2_ = Vec(
+            glm::vec3 v2_ = glm::vec3(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3 + 2 ]
             ) + position;
 
-            Vec t0_, t1_, t2_;
+            glm::vec3 t0_, t1_, t2_;
 
             //Attempt to load triangle texture coordinates
             if (m_shapes[i].mesh.indices[3 * f + 2] * 2 + 1 < m_shapes[i].mesh.texcoords.size()) {
-                t0_ = Vec(
+                t0_ = glm::vec3(
                         m_shapes[i].mesh.texcoords[m_shapes[i].mesh.indices[3 * f] * 2],
                         m_shapes[i].mesh.texcoords[m_shapes[i].mesh.indices[3 * f] * 2 + 1],
                         0
                 );
 
-                t1_ = Vec(
+                t1_ = glm::vec3(
                         m_shapes[i].mesh.texcoords[m_shapes[i].mesh.indices[3 * f + 1] * 2],
                         m_shapes[i].mesh.texcoords[m_shapes[i].mesh.indices[3 * f + 1] * 2 + 1],
                         0
                 );
 
-                t2_ = Vec(
+                t2_ = glm::vec3(
                         m_shapes[i].mesh.texcoords[m_shapes[i].mesh.indices[3 * f + 2] * 2],
                         m_shapes[i].mesh.texcoords[m_shapes[i].mesh.indices[3 * f + 2] * 2 + 1],
                         0
                 );
             }
             else {
-                t0_=Vec();
-                t1_=Vec();
-                t2_=Vec();
+                t0_=glm::vec3();
+                t1_=glm::vec3();
+                t2_=glm::vec3();
             }
 
-            if (m_shapes[i].mesh.material_ids[ f ] < materials.size())
+            if (m_shapes[i].mesh.material_ids[ f ] != -1 &&  m_shapes[i].mesh.material_ids[ f ] < materials.size())
                 tris.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, materials[ m_shapes[i].mesh.material_ids[ f ] ]));
             else
                 tris.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, material));
@@ -139,11 +138,11 @@ Mesh::Mesh(Vec p_, const char* file_path, Material* m_) : Object(p_, m_){
 
 // Check if ray intersects with mesh. Returns ObjectIntersection data structure
 ObjectIntersection Mesh::get_intersection(const Ray &ray) {
-    double t=0, tmin=INFINITY;
-    Vec normal = Vec();
-    Vec colour = Vec();
+    float t=0, tmin=INFINITY;
+    glm::vec3 normal = glm::vec3();
+    glm::vec3 colour = glm::vec3();
     bool hit = node->hit(node, ray, t, tmin, normal, colour);
     //bool hit = bvh.getIntersection(ray, t, tmin, normal);
-    return ObjectIntersection(hit, tmin, normal, new DiffuseMaterial(false, colour, Vec()));
+    return ObjectIntersection(hit, tmin, normal, new DiffuseMaterial(false, colour, glm::vec3()));
 
 }
