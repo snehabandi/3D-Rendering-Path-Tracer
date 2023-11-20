@@ -4,7 +4,9 @@
 #include <vector>
 
 #include "ray.h"
-#include "triangle.h"
+#include "objects.h"
+
+struct Triangle;
 
 class KDNode {
 public:

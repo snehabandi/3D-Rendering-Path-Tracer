@@ -1,7 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "../lib/rand48/erand48.h"
 #include "ray.h"
 
 class Camera {

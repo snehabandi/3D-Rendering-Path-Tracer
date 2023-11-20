@@ -1,8 +1,22 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "scene.h"
 #include "camera.h"
+#include "objects.h"
+#include <glm/glm.hpp>
+
+
+class Scene {
+private:
+    std::vector<Object*> m_objects;
+
+public:
+    Scene(){};
+    void add(Object *object);
+    ObjectIntersection intersect(const Ray &ray);
+    glm::vec3 trace_ray(const Ray &ray, int depth, unsigned short*Xi);
+};
+
 
 class Renderer {
 

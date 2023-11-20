@@ -2,6 +2,7 @@
 
 #include "ray.h"
 #include "material.h"
+#include "random_float.h"
 
 glm::vec3 Material::get_colour() const { return m_colour; }
 
@@ -18,7 +19,7 @@ Ray DiffuseMaterial::get_reflected_ray(const Ray &r, glm::vec3 &p, const glm::ve
 	// Ideal diffuse reflection
     // Cosine weighted sampling
     glm::vec3 nl=glm::dot(n, r.direction)<0?n:n*-1.0f;
-    float r1=2*M_PI*erand48(Xi), r2=erand48(Xi), r2s=sqrt(r2);
+    float r1=2*M_PI*rand_float(), r2=rand_float(), r2s=sqrt(r2);
     
     glm::vec3 w=nl;
     glm::vec3 u_intermediate = fabs(w.x)>.1?glm::vec3(0,1, 0):glm::vec3(1);
@@ -39,9 +40,9 @@ Ray SpecularMaterial::get_reflected_ray(const Ray &r, glm::vec3 &p, const glm::v
     double roughness = 0.8;
     glm::vec3 reflected = r.direction - n * 2.0f * glm::dot(n, r.direction);
     reflected = glm::normalize(glm::vec3(
-        reflected.x + (erand48(Xi)-0.5)*roughness,
-        reflected.y + (erand48(Xi)-0.5)*roughness,
-        reflected.z + (erand48(Xi)-0.5)*roughness
+        reflected.x + (rand_float()-0.5)*roughness,
+        reflected.y + (rand_float()-0.5)*roughness,
+        reflected.z + (rand_float()-0.5)*roughness
     ));
 
     return Ray(p, reflected);	

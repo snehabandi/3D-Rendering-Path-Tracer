@@ -29,7 +29,7 @@ ObjectIntersection Sphere::get_intersection(const Ray &ray) {
 }
 
 
-Mesh::Mesh(glm::vec3 p_, const char* file_path, Material* m_) : Object(p_, m_){
+Mesh::Mesh(glm::vec3 p_, const char* file_path, Material* m_, glm::mat3 t_) : Object(p_, m_, t_){
 
 	position=p_, material=m_;
 
@@ -78,23 +78,23 @@ Mesh::Mesh(glm::vec3 p_, const char* file_path, Material* m_) : Object(p_, m_){
         for (auto f = (decltype(indices_size)) 0; f < indices_size; f++) {
 
             // Triangle vertex coordinates
-            glm::vec3 v0_ = glm::vec3(
+            glm::vec3 v0_ = t_*glm::vec3(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f] * 3 + 2 ]
             ) + position;
 
-            glm::vec3 v1_ = glm::vec3(
+            glm::vec3 v1_ = t_*glm::vec3(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 1] * 3 + 2 ]
-            ) + position;
+            )+ position;
 
-            glm::vec3 v2_ = glm::vec3(
+            glm::vec3 v2_ = t_*glm::vec3(
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3     ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3 + 1 ],
                     m_shapes[i].mesh.positions[ m_shapes[i].mesh.indices[3*f + 2] * 3 + 2 ]
-            ) + position;
+        )+ position;
 
             glm::vec3 t0_, t1_, t2_;
 
@@ -136,6 +136,7 @@ Mesh::Mesh(glm::vec3 p_, const char* file_path, Material* m_) : Object(p_, m_){
 	//bvh = BVH(&tris);
 }
 
+const Material *dptr;
 // Check if ray intersects with mesh. Returns ObjectIntersection data structure
 ObjectIntersection Mesh::get_intersection(const Ray &ray) {
     float t=0, tmin=INFINITY;
@@ -143,6 +144,6 @@ ObjectIntersection Mesh::get_intersection(const Ray &ray) {
     glm::vec3 colour = glm::vec3();
     bool hit = node->hit(node, ray, t, tmin, normal, colour);
     //bool hit = bvh.getIntersection(ray, t, tmin, normal);
-    return ObjectIntersection(hit, tmin, normal, new DiffuseMaterial(false, colour, glm::vec3()));
+    return ObjectIntersection(hit, tmin, normal, new DiffuseMaterial(false, colour, glm::vec3(), Texture(), true));
 
 }

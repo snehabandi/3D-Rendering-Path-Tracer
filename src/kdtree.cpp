@@ -1,7 +1,6 @@
 #include <vector>
 
 #include "ray.h"
-#include "triangle.h"
 #include "kdtree.h"
 
 // Build KD tree for tris

@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "texture.h"
-#include "../lib/lodepng/lodepng.h"
+#include "../third_party/lodepng/lodepng.h"
 
 Texture::Texture(const char *filename) {
     image = std::vector<unsigned char>();

@@ -20,10 +20,8 @@ set(SOURCE_FILES
     src/kdtree.cpp
     src/texture.cpp
     src/camera.cpp
-    src/scene.cpp
     src/renderer.cpp
-    lib/rand48/rand48.c
-    lib/lodepng/lodepng.cpp
-    lib/tiny_obj_loader/tiny_obj_loader.cc)
+    third_party/lodepng/lodepng.cpp
+    third_party/tiny_obj_loader/tiny_obj_loader.cc)
 
 add_executable(pathtracer ${SOURCE_FILES})
