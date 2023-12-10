@@ -145,3 +145,16 @@ Code Quality: Review for maintainability, scalability, and adherence to best pra
 The projects aimed to create a high-performance Path Tracer, aligning with scientific computing and visualization requirements. By achieving the outlined objectives and meeting evaluation criteria, the resulting tool will be valuable for in fields requiring accurate and visually compelling 3D renderings. 
 
 Future work could involve further optimizations (Like : Metropolis Light Transport), additional rendering features (Like : bidirectional path tracing), and implementation and exploration of extensions like real-time interactive rendering.
+
+
+## 8. References
+
+Kajiya, J. T. (1998). The rendering equation. Seminal Graphics, 157–164. https://doi.org/10.1145/280811.280987 
+
+Shirley, P., &amp; Morley, R. K. (2009). Realistic ray tracing. Ak Peters. 
+
+Rafael-Fuente. (n.d.). Rafael-Fuente/python-raytracer: A basic ray tracer that exploits numpy arrays and functions to work fast. GitHub. https://github.com/rafael-fuente/Python-Raytracer/ 
+
+Pharr, M., Jakob, W., &amp; Humphreys, G. (2023). Physically based rendering: From theory to implementation. The MIT Press. 
+
+Introduction to Raytracing: A Simple Method for Creating 3D Images. ScratchAPixel. (n.d.). https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-ray-tracing/how-does-it-work.html 
