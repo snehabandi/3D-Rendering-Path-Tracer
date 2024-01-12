@@ -1,5 +1,3 @@
-# CSCI596
-
 # Path Tracer
 
 ![](readme_images/internet_path_traced.jpg)
